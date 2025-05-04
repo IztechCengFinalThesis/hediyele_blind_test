@@ -29,9 +29,8 @@ export default function ComparePage() {
     useState<Recommendations | null>(null);
   const [userParams, setUserParams] = useState<UserParams | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
-  const [selections, setSelections] = useState<Record<number, number | null>>(
-    {}
-  );
+  const [selections, setSelections] = useState<Record<number, number | null>>({});
+  const [badSteps, setBadSteps] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
     const rec = sessionStorage.getItem("recommendations");
@@ -45,7 +44,13 @@ export default function ComparePage() {
   }, [navigate]);
 
   const handleSelect = (productId: number) => {
+    if (badSteps[currentStep]) return; // Don't allow selection if step is marked as bad
     setSelections((prev) => ({ ...prev, [currentStep]: productId }));
+  };
+
+  const handleBadRecommendation = () => {
+    setBadSteps((prev) => ({ ...prev, [currentStep]: true }));
+    setSelections((prev) => ({ ...prev, [currentStep]: null })); // Clear selection for this step
   };
 
   const handleSubmit = async () => {
@@ -69,6 +74,7 @@ export default function ComparePage() {
           product_id: product.product_id,
           recommended_order: step + 1,
           is_selected: isSelected,
+          bad_recommendation: badSteps[step] || false,
         });
       }
     }
@@ -93,6 +99,7 @@ export default function ComparePage() {
   if (!recommendations) return null;
 
   const productSources = ["algorithm_1", "algorithm_2", "algorithm_3"] as const;
+  const isCurrentStepBad = badSteps[currentStep];
 
   return (
     <div className="min-h-screen text-white flex flex-col items-center justify-center px-4 py-8">
@@ -118,6 +125,8 @@ export default function ComparePage() {
               className={`flex flex-col items-center space-y-4 p-6 rounded-2xl backdrop-blur-md transition-all transform hover:scale-105 ${
                 isSelected
                   ? "bg-white/30 border-4 border-rose-400 scale-105 shadow-xl"
+                  : isCurrentStepBad
+                  ? "bg-red-500/20 border-2 border-red-500"
                   : "bg-white/20 border border-white/20 hover:border-white/50"
               }`}
             >
@@ -139,11 +148,21 @@ export default function ComparePage() {
                 value={product.product_id.toString()}
                 id={`product-${product.product_id}`}
                 className="sr-only"
+                disabled={isCurrentStepBad}
               />
             </label>
           );
         })}
       </RadioGroup>
+
+      {!isCurrentStepBad && (
+        <Button
+          onClick={handleBadRecommendation}
+          className="mt-8 bg-red-500 hover:bg-red-600 text-white font-medium px-8 py-3 rounded-full transition-all duration-300"
+        >
+          Hepsi Çok Kötü ❌
+        </Button>
+      )}
 
       <div className="flex justify-between mt-12 w-full max-w-6xl px-4">
         <Button
@@ -159,7 +178,7 @@ export default function ComparePage() {
           <Button
             className="flex items-center gap-2 bg-white text-black font-medium px-6 py-2 rounded-full hover:bg-rose-400 hover:text-white transition-all duration-300"
             onClick={() => setCurrentStep((s) => Math.min(s + 1, 4))}
-            disabled={selections[currentStep] == null}
+            disabled={!isCurrentStepBad && selections[currentStep] == null}
           >
             <span className="hidden sm:inline">İleri</span>▶
           </Button>
@@ -167,7 +186,7 @@ export default function ComparePage() {
           <Button
             className="bg-rose-500 hover:bg-rose-600 text-white font-medium px-6 py-2 rounded-full transition-all duration-300"
             onClick={handleSubmit}
-            disabled={Object.keys(selections).length < 5}
+            disabled={Object.keys(selections).length < 5 && !Object.values(badSteps).some(Boolean)}
           >
             Gönder 🚀
           </Button>
