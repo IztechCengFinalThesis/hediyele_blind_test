@@ -3,6 +3,7 @@ import { useNavigate } from "@remix-run/react";
 import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
 import { Button } from "../components/ui/button";
 import { Checkbox } from "../components/ui/checkbox";
+import PreviousSessions from "../components/PreviousSessions";
 
 const interestsList = [
   "sports",
@@ -112,6 +113,15 @@ export default function IndexPage() {
       sessionStorage.setItem("user_params", JSON.stringify(payload));
       navigate("/compare");
     }
+  };
+
+  const handleSessionSelect = (session: any) => {
+    setGender(session.parameters.gender);
+    setAge(session.parameters.age);
+    setSpecial(session.parameters.special);
+    setInterests(session.parameters.interests);
+    setMinBudget(session.parameters.min_budget?.toString() || "");
+    setMaxBudget(session.parameters.max_budget?.toString() || "");
   };
 
   return (
@@ -309,6 +319,8 @@ export default function IndexPage() {
           </Button>
         </div>
       </div>
+
+      <PreviousSessions onSessionSelect={handleSessionSelect} />
     </div>
   );
 }
