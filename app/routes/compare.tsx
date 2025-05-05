@@ -20,11 +20,8 @@ type Product = {
   score: number;
 };
 
-type Recommendations = {
-  algorithm_1: Product[];
-  algorithm_2: Product[];
-  algorithm_3: Product[];
-};
+// Updated to support variable number of algorithms
+type Recommendations = Record<string, Product[]>;
 
 export default function ComparePage() {
   const navigate = useNavigate();
@@ -62,26 +59,26 @@ export default function ComparePage() {
   const handleSubmit = async () => {
     if (!recommendations || !userParams) return;
 
-    const productSources = [
-      "algorithm_1",
-      "algorithm_2",
-      "algorithm_3",
-    ] as const;
+    // Dynamically get algorithm names from the recommendations object
+    const productSources = Object.keys(recommendations);
 
     const allSelections = [];
 
     for (let step = 0; step < 5; step++) {
       for (const algo of productSources) {
-        const product = recommendations[algo][step];
-        const isSelected = selections[step] === product.product_id;
+        // Check if the algorithm has this step
+        if (recommendations[algo] && recommendations[algo][step]) {
+          const product = recommendations[algo][step];
+          const isSelected = selections[step] === product.product_id;
 
-        allSelections.push({
-          algorithm: algo,
-          product_id: product.product_id,
-          recommended_order: step + 1,
-          is_selected: isSelected,
-          bad_recommendation: badSteps[step] || false,
-        });
+          allSelections.push({
+            algorithm: algo,
+            product_id: product.product_id,
+            recommended_order: step + 1,
+            is_selected: isSelected,
+            bad_recommendation: badSteps[step] || false,
+          });
+        }
       }
     }
 
@@ -118,7 +115,8 @@ export default function ComparePage() {
 
   if (!recommendations) return null;
 
-  const productSources = ["algorithm_1", "algorithm_2", "algorithm_3"] as const;
+  // Dynamically get algorithm names from the recommendations object
+  const productSources = Object.keys(recommendations);
   const isCurrentStepBad = badSteps[currentStep];
 
   return (

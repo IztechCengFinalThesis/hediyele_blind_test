@@ -4,7 +4,7 @@
 
 html,
 body {
-  @apply bg-contain bg-fixed bg-center text-white;
+  @apply bg-cover bg-fixed bg-center text-white;
   background-image: url("/background.jpg");
 
   @media (prefers-color-scheme: dark) {
