@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "@remix-run/react";
 import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
 import { Button } from "../components/ui/button";
 import { Checkbox } from "../components/ui/checkbox";
 import PreviousSessions from "../components/PreviousSessions";
+import EmailEntry from "../components/EmailEntry";
+import LogoutButton from "../components/LogoutButton";
 
 const interestsList = [
   "sports",
@@ -25,12 +27,32 @@ const interestsList = [
 export default function IndexPage() {
   const navigate = useNavigate();
 
+  const [emailSubmitted, setEmailSubmitted] = useState<boolean>(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [gender, setGender] = useState<string | null>(null);
   const [age, setAge] = useState<string | null>(null);
   const [special, setSpecial] = useState<string | null>(null);
   const [interests, setInterests] = useState<string[]>([]);
   const [minBudget, setMinBudget] = useState<string>("");
   const [maxBudget, setMaxBudget] = useState<string>("");
+
+  // Check if email is already in session storage on component mount
+  useEffect(() => {
+    const email = sessionStorage.getItem("user_email");
+    if (email) {
+      setUserEmail(email);
+      setEmailSubmitted(true);
+    } else {
+      // If no email in session storage, ensure we're showing the email entry screen
+      setEmailSubmitted(false);
+      setUserEmail(null);
+    }
+  }, []);
+
+  const handleEmailSubmit = (email: string) => {
+    setUserEmail(email);
+    setEmailSubmitted(true);
+  };
 
   const handleInterestToggle = (value: string) => {
     setInterests((prev) =>
@@ -90,7 +112,10 @@ export default function IndexPage() {
     parseFloat(minBudget) <= parseFloat(maxBudget);
 
   const handleNext = async () => {
+    if (!userEmail) return;
+    
     const payload = {
+      email: userEmail,
       gender,
       age,
       special,
@@ -110,8 +135,23 @@ export default function IndexPage() {
     if (res.ok) {
       const data = await res.json();
       sessionStorage.setItem("recommendations", JSON.stringify(data));
-      sessionStorage.setItem("user_params", JSON.stringify(payload));
+      
+      // Store parameters correctly structured for the backend
+      const userParams = {
+        gender,
+        age,
+        special,
+        interests,
+        min_budget: parseFloat(minBudget),
+        max_budget: parseFloat(maxBudget),
+      };
+      sessionStorage.setItem("user_params", JSON.stringify(userParams));
+      
       navigate("/compare");
+    } else {
+      const errorData = await res.text();
+      console.error("Error:", res.status, errorData);
+      alert("Bir hata oluştu: " + res.status);
     }
   };
 
@@ -124,8 +164,19 @@ export default function IndexPage() {
     setMaxBudget(session.parameters.max_budget?.toString() || "");
   };
 
+  // If email not yet submitted, show email entry screen
+  if (!emailSubmitted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center relative">
+        <EmailEntry onSubmit={handleEmailSubmit} />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center relative">
+      <LogoutButton />
+      
       <div className="absolute top-4 right-4">
         <Button
           onClick={randomize}
@@ -250,7 +301,7 @@ export default function IndexPage() {
           <RadioGroup
             value={special ?? ""}
             onValueChange={setSpecial}
-            className="flex flex-wrap gap-2"
+            className="grid grid-cols-4 gap-2"
           >
             {[
               "birthday",
@@ -274,7 +325,9 @@ export default function IndexPage() {
                     data-[state=checked]:bg-rose-500
                     data-[state=checked]:text-white"
                 />
-                <label htmlFor={`special-${s}`}>{s.replaceAll("_", " ")}</label>
+                <label htmlFor={`special-${s}`}>
+                  {s.replaceAll("_", " ")}
+                </label>
               </div>
             ))}
           </RadioGroup>
@@ -282,45 +335,40 @@ export default function IndexPage() {
 
         {/* Interests */}
         <div className="space-y-2 text-white">
-          <span className="block font-medium">İlgi Alanları:</span>
-          <div className="grid grid-cols-2 gap-2">
-            {interestsList.map((i) => (
-              <label
-                key={i}
-                htmlFor={`interest-${i}`}
-                className="flex items-center gap-2 hover:scale-[1.02] transition-transform duration-200"
+          <span className="block font-medium mb-2">İlgi Alanları:</span>
+          <div className="grid grid-cols-3 gap-2">
+            {interestsList.map((interest) => (
+              <div
+                key={interest}
+                className="flex items-center space-x-2 hover:scale-105 transition-transform duration-200"
               >
                 <Checkbox
-                  id={`interest-${i}`}
-                  checked={interests.includes(i)}
-                  onCheckedChange={() => handleInterestToggle(i)}
-                  className="text-white border-white transition-all duration-200 ease-in-out
-                    data-[state=checked]:bg-rose-500
-                    data-[state=checked]:border-rose-500"
+                  id={`interest-${interest}`}
+                  checked={interests.includes(interest)}
+                  onCheckedChange={() => handleInterestToggle(interest)}
+                  className="border-white data-[state=checked]:bg-rose-500 data-[state=checked]:border-rose-500"
                 />
-                <span>{i.replaceAll("_", " ")}</span>
-              </label>
+                <label
+                  htmlFor={`interest-${interest}`}
+                  className="text-sm cursor-pointer"
+                >
+                  {interest.replaceAll("_", " ")}
+                </label>
+              </div>
             ))}
           </div>
         </div>
 
-        {/* Submit */}
-        <div className="pt-4">
-          <Button
-            onClick={handleNext}
-            disabled={!isReady}
-            className={`w-full font-semibold transition-all duration-300 ${
-              isReady
-                ? "bg-gray-300 hover:bg-rose-500 text-black hover:text-white"
-                : "bg-gray-600 text-gray-300 cursor-not-allowed"
-            }`}
-          >
-            İleri →
-          </Button>
-        </div>
+        <Button
+          onClick={handleNext}
+          disabled={!isReady}
+          className="w-full bg-rose-500 hover:bg-rose-600 py-2 font-semibold text-white rounded-lg disabled:opacity-50 transition-colors mt-4"
+        >
+          Devam Et
+        </Button>
       </div>
 
-      <PreviousSessions onSessionSelect={handleSessionSelect} />
+      {userEmail && <PreviousSessions onSessionSelect={handleSessionSelect} />}
     </div>
   );
 }

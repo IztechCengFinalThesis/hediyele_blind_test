@@ -13,7 +13,7 @@ export default function DonePage() {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 text-white">
+    <div className="min-h-screen flex items-center justify-center px-4 text-white relative">
       <div className="animate-fadeIn backdrop-blur-lg bg-white/10 border border-white/20 p-8 rounded-3xl text-center space-y-5 max-w-md w-full transition-all duration-300 hover:shadow-2xl hover:border-white/40">
         <h1 className="text-4xl font-bold text-white drop-shadow-md">
           🎉 Teşekkürler!

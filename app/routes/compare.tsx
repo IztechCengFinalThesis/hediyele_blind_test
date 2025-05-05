@@ -2,12 +2,15 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "@remix-run/react";
 import { Button } from "../components/ui/button";
 import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
+import LogoutButton from "../components/LogoutButton";
 
 type UserParams = {
   gender: string;
   age: string;
   special: string;
   interests: string[];
+  min_budget: number;
+  max_budget: number;
 };
 
 type Product = {
@@ -35,10 +38,13 @@ export default function ComparePage() {
   useEffect(() => {
     const rec = sessionStorage.getItem("recommendations");
     const params = sessionStorage.getItem("user_params");
-    if (!rec || !params) {
+    const email = sessionStorage.getItem("user_email");
+    
+    if (!rec || !params || !email) {
       navigate("/");
       return;
     }
+    
     setRecommendations(JSON.parse(rec));
     setUserParams(JSON.parse(params));
   }, [navigate]);
@@ -79,20 +85,34 @@ export default function ComparePage() {
       }
     }
 
+    const email = sessionStorage.getItem("user_email");
+    
+    const payload = {
+      email: email,
+      session_parameters: userParams,
+      selections: allSelections,
+    };
+    
+    console.log("Submitting payload:", payload);
+    
     const res = await fetch("http://localhost:8000/api/blind-test/submit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        session_parameters: userParams,
-        selections: allSelections,
-      }),
+      body: JSON.stringify(payload),
     });
 
     if (res.ok) {
+      // Don't clear email from sessionStorage to maintain login state
+      const email = sessionStorage.getItem("user_email");
       sessionStorage.clear();
+      if (email) {
+        sessionStorage.setItem("user_email", email);
+      }
       navigate("/done");
     } else {
-      alert("Bir hata oluştu.");
+      const errorData = await res.text();
+      console.error("Submission error:", res.status, errorData);
+      alert("Bir hata oluştu: " + res.status);
     }
   };
 
@@ -103,6 +123,8 @@ export default function ComparePage() {
 
   return (
     <div className="min-h-screen text-white flex flex-col items-center justify-center px-4 py-8">
+      <LogoutButton />
+      
       <h2 className="text-3xl font-bold mb-6 drop-shadow-xl tracking-wide">
         Adım {currentStep + 1}/5
       </h2>
