@@ -151,7 +151,7 @@ export default function ComparePage() {
               }`}
             >
               <img
-                src="/products/indir.jpeg"
+                src={`http://localhost:8000/api/public/products/${product.product_id}/thumbnail`}
                 alt={product.product_name}
                 className="w-56 h-56 object-cover rounded-xl shadow-lg"
               />
