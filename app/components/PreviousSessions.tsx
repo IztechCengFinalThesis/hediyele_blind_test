@@ -35,7 +35,7 @@ export default function PreviousSessions({ onSessionSelect }: PreviousSessionsPr
         }
 
         const response = await fetch(
-          `http://localhost:8000/api/blind-test/previous-sessions?email=${encodeURIComponent(email)}`
+          `https://hediyelebackend-production.up.railway.app/api/blind-test/previous-sessions?email=${encodeURIComponent(email)}`
         );
         
         if (!response.ok) {

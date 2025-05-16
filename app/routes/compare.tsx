@@ -92,7 +92,7 @@ export default function ComparePage() {
     
     console.log("Submitting payload:", payload);
     
-    const res = await fetch("http://localhost:8000/api/blind-test/submit", {
+    const res = await fetch("https://hediyelebackend-production.up.railway.app/api/blind-test/submit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -151,7 +151,7 @@ export default function ComparePage() {
               }`}
             >
               <img
-                src={`http://localhost:8000/api/public/products/${product.product_id}/thumbnail`}
+                src={`https://hediyelebackend-production.up.railway.app/api/public/products/${product.product_id}/thumbnail`}
                 alt={product.product_name}
                 className="w-56 h-56 object-cover rounded-xl shadow-lg"
               />

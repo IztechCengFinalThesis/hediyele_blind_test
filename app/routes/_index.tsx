@@ -124,7 +124,7 @@ export default function IndexPage() {
       max_budget: parseFloat(maxBudget),
     };
     const res = await fetch(
-      "http://localhost:8000/api/blind-test/recommendations",
+      "https://hediyelebackend-production.up.railway.app/api/blind-test/recommendations",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
