@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import "./tailwind-animations.css";
+import { Button } from "./ui/button";
 
 interface PreviousSession {
   session_id: number;
@@ -17,9 +18,10 @@ interface PreviousSession {
 
 interface PreviousSessionsProps {
   onSessionSelect: (session: PreviousSession) => void;
+  onClose?: () => void;
 }
 
-export default function PreviousSessions({ onSessionSelect }: PreviousSessionsProps) {
+export default function PreviousSessions({ onSessionSelect, onClose }: PreviousSessionsProps) {
   const [sessions, setSessions] = useState<PreviousSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -54,23 +56,72 @@ export default function PreviousSessions({ onSessionSelect }: PreviousSessionsPr
     fetchSessions();
   }, []);
 
+  const containerClass = "fixed bottom-4 right-4 bg-white/10 backdrop-blur-xl border-2 border-white/30 p-4 rounded-2xl shadow-xl w-80 z-10 animate-fadeIn";
+
   if (loading) return (
-    <div className="fixed bottom-4 right-4 bg-white/10 backdrop-blur-xl border-2 border-white/30 p-4 rounded-2xl shadow-xl w-80 z-10 animate-fadeIn">
-      <h3 className="text-white text-lg font-semibold mb-2">Previous Sessions</h3>
+    <div className={containerClass}>
+      <div className="flex justify-between items-center mb-2">
+        <h3 className="text-white text-lg font-semibold">Previous Sessions</h3>
+        {onClose && (
+          <Button
+            onClick={onClose}
+            className="sm:hidden bg-white/10 border border-white text-white rounded-full p-1 hover:bg-rose-500 hover:border-rose-500 transition-all duration-300 text-xs"
+          >
+            ❌
+          </Button>
+        )}
+      </div>
       <div className="text-white animate-pulse">Loading previous sessions...</div>
     </div>
   );
-  if (error) return <div className="text-red-400 fixed bottom-4 right-4 bg-white/10 backdrop-blur-xl border-2 border-red-400/30 p-4 rounded-2xl shadow-xl w-80 z-10 animate-fadeIn">{error}</div>;
+
+  if (error) return (
+    <div className={containerClass}>
+      <div className="flex justify-between items-center mb-2">
+        <h3 className="text-white text-lg font-semibold">Previous Sessions</h3>
+        {onClose && (
+          <Button
+            onClick={onClose}
+            className="sm:hidden bg-white/10 border border-white text-white rounded-full p-1 hover:bg-rose-500 hover:border-rose-500 transition-all duration-300 text-xs"
+          >
+            ❌
+          </Button>
+        )}
+      </div>
+      <div className="text-red-400">{error}</div>
+    </div>
+  );
+
   if (sessions.length === 0) return (
-    <div className="fixed bottom-4 right-4 bg-white/10 backdrop-blur-xl border-2 border-white/30 p-4 rounded-2xl shadow-xl w-80 z-10 animate-fadeIn">
-      <h3 className="text-white text-lg font-semibold mb-2">Previous Sessions</h3>
+    <div className={containerClass}>
+      <div className="flex justify-between items-center mb-2">
+        <h3 className="text-white text-lg font-semibold">Previous Sessions</h3>
+        {onClose && (
+          <Button
+            onClick={onClose}
+            className="sm:hidden bg-white/10 border border-white text-white rounded-full p-1 hover:bg-rose-500 hover:border-rose-500 transition-all duration-300 text-xs"
+          >
+            ❌
+          </Button>
+        )}
+      </div>
       <div className="text-white bg-white/5 p-3 rounded-lg border border-white/10">Previous sessions not found</div>
     </div>
   );
 
   return (
-    <div className="fixed bottom-4 right-4 bg-white/10 backdrop-blur-xl border-2 border-white/30 p-4 rounded-2xl shadow-xl w-80 z-10 animate-fadeIn">
-      <h3 className="text-white text-lg font-semibold mb-2">Previous Sessions</h3>
+    <div className={containerClass}>
+      <div className="flex justify-between items-center mb-2">
+        <h3 className="text-white text-lg font-semibold">Previous Sessions</h3>
+        {onClose && (
+          <Button
+            onClick={onClose}
+            className="sm:hidden rounded-full bg-transparent hover:bg-rose-500 hover:border-rose-500 text-xs"
+          >
+            ❌
+          </Button>
+        )}
+      </div>
       <div className="space-y-2 max-h-40 overflow-y-auto pr-2">
         {sessions.map((session, index) => (
           <button

@@ -120,17 +120,17 @@ export default function ComparePage() {
   const isCurrentStepBad = badSteps[currentStep];
 
   return (
-    <div className="min-h-screen text-white flex flex-col items-center justify-center px-4 py-8">
+    <div className="min-h-screen text-white flex flex-col items-center justify-center px-2 sm:px-4 py-4 sm:py-8">
       <LogoutButton />
       
-      <h2 className="text-3xl font-bold mb-6 drop-shadow-xl tracking-wide">
+      <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 drop-shadow-xl tracking-wide">
         Adım {currentStep + 1}/5
       </h2>
 
       <RadioGroup
         value={selections[currentStep]?.toString() ?? ""}
         onValueChange={(val) => handleSelect(parseInt(val))}
-        className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl"
+        className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-8 w-full max-w-6xl"
       >
         {productSources.map((algo) => {
           const product = recommendations?.[algo][currentStep];
@@ -142,7 +142,7 @@ export default function ComparePage() {
             <label
               key={`${algo}-${product.product_id}`}
               htmlFor={`product-${product.product_id}`}
-              className={`flex flex-col items-center space-y-4 p-6 rounded-2xl backdrop-blur-md transition-all transform hover:scale-105 ${
+              className={`flex flex-col items-center space-y-3 sm:space-y-4 p-3 sm:p-6 rounded-2xl backdrop-blur-md transition-all transform hover:scale-105 ${
                 isSelected
                   ? "bg-white/30 border-4 border-rose-400 scale-105 shadow-xl"
                   : isCurrentStepBad
@@ -153,12 +153,12 @@ export default function ComparePage() {
               <img
                 src={`https://hediyelebackend-production.up.railway.app/api/public/products/${product.product_id}/thumbnail`}
                 alt={product.product_name}
-                className="w-56 h-56 object-cover rounded-xl shadow-lg"
+                className="w-40 h-40 sm:w-56 sm:h-56 object-cover rounded-xl shadow-lg"
               />
-              <p className="text-center font-semibold text-xl drop-shadow-sm">
+              <p className="text-center font-semibold text-lg sm:text-xl drop-shadow-sm">
                 {product.product_name}
               </p>
-              <p className="text-center text-sm text-gray-200 bg-white/10 px-3 py-1 rounded-full shadow-sm">
+              <p className="text-center text-xs sm:text-sm text-gray-200 bg-white/10 px-2 sm:px-3 py-1 rounded-full shadow-sm">
                 {product.price.toLocaleString("tr-TR", {
                   style: "currency",
                   currency: "TRY",
@@ -178,16 +178,16 @@ export default function ComparePage() {
       {!isCurrentStepBad && (
         <Button
           onClick={handleBadRecommendation}
-          className="mt-8 bg-red-500 hover:bg-red-600 text-white font-medium px-8 py-3 rounded-full transition-all duration-300"
+          className="mt-6 sm:mt-8 bg-red-500 hover:bg-red-600 text-white font-medium px-6 sm:px-8 py-2 sm:py-3 rounded-full transition-all duration-300 text-sm sm:text-base"
         >
           Hepsi Çok Kötü ❌
         </Button>
       )}
 
-      <div className="flex justify-between mt-12 w-full max-w-6xl px-4">
+      <div className="flex justify-between mt-8 sm:mt-12 w-full max-w-6xl px-2 sm:px-4">
         <Button
           variant="ghost"
-          className="flex items-center gap-2 text-white border border-white/30 px-6 py-2 rounded-full bg-white/20 hover:bg-white/80 hover:border-white/50 transition-all duration-300"
+          className="flex items-center gap-2 text-white border border-white/30 px-4 sm:px-6 py-2 rounded-full bg-white/20 hover:bg-white/80 hover:border-white/50 transition-all duration-300 text-sm sm:text-base"
           onClick={() => setCurrentStep((s) => Math.max(s - 1, 0))}
           disabled={currentStep === 0}
         >
@@ -196,7 +196,7 @@ export default function ComparePage() {
 
         {currentStep < 4 ? (
           <Button
-            className="flex items-center gap-2 bg-white text-black font-medium px-6 py-2 rounded-full hover:bg-rose-400 hover:text-white transition-all duration-300"
+            className="flex items-center gap-2 bg-white text-black font-medium px-4 sm:px-6 py-2 rounded-full hover:bg-rose-400 hover:text-white transition-all duration-300 text-sm sm:text-base"
             onClick={() => setCurrentStep((s) => Math.min(s + 1, 4))}
             disabled={!isCurrentStepBad && selections[currentStep] == null}
           >
@@ -204,7 +204,7 @@ export default function ComparePage() {
           </Button>
         ) : (
           <Button
-            className="bg-rose-500 hover:bg-rose-600 text-white font-medium px-6 py-2 rounded-full transition-all duration-300"
+            className="bg-rose-500 hover:bg-rose-600 text-white font-medium px-4 sm:px-6 py-2 rounded-full transition-all duration-300 text-sm sm:text-base"
             onClick={handleSubmit}
             disabled={Object.keys(selections).length < 5 && !Object.values(badSteps).some(Boolean)}
           >
